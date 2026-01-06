@@ -20,6 +20,32 @@ qt_add_qml_module(appMerchant_end
     VERSION 1.0
     SOURCES     main.cpp
     QML_FILES   Main.qml
+    QML_FILES page/MainWindow.qml
+    QML_FILES page/ProductManagementPage.qml
+    QML_FILES page/OrderManagementPage.qml
+    QML_FILES components/NavButton.qml
+    QML_FILES components/TabButton.qml
+    QML_FILES components/ProductItem.qml
+    QML_FILES components/OrderItem.qml
+    QML_FILES components/OrderStatCard.qml
+    QML_FILES components/OrderDetailDialog.qml
+    QML_FILES components/ShippingDialog.qml
+    QML_FILES page/HomePage.qml
+    QML_FILES components/PublishProductDialog.qml
+    QML_FILES components/ConfirmDialog.qml
+    QML_FILES components/StatusBadge.qml
+    QML_FILES components/EmptyState.qml
+    QML_FILES components/SearchInput.qml
+    QML_FILES components/StyledButton.qml
+    QML_FILES components/IconButton.qml
+    QML_FILES components/ButtonRow.qml
+    QML_FILES components/SmallButton.qml
+    QML_FILES components/DialogButtons.qml
+    QML_FILES components/TextBox.qml
+    QML_FILES components/NetworkManager.qml
+    QML_FILES components/SelectBox.qml
+    QML_FILES components/NumberBox.qml
+    QML_FILES components/StockModificationDialog.qml
 )
 
 target_sources(appMerchant_end
