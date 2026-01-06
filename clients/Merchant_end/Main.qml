@@ -1,29 +1,15 @@
 import QtQuick
 import QtQuick.Controls
+import"./page"
 
 ApplicationWindow {
-    width: 640
-    height: 480
+    width: 1000
+    height: 600
     visible: true
-    title: qsTr("Hello World")
-    menuBar: MenuBar {
-        Menu {
-            title: qsTr("File")
-            MenuItem {
-                text: qsTr("&Open")
-                onTriggered: console.log("Open action triggered");
-            }
-            MenuItem {
-                text: qsTr("Exit")
-                onTriggered: Qt.quit();
-            }
-        }
-    }
+    title: qsTr("UniBuy")
+    color: "black"
 
-    //Content Area
-    TextArea {
-        text: qsTr("Hello World")
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+    MainWindow{
+
     }
 }
