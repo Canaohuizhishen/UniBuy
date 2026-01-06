@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 
+set(QT_FORCE_CMP0156_TO_VALUE NEW)
 
 qt_add_executable(appUniBuy)
 
@@ -172,3 +173,6 @@ install(TARGETS appUniBuy
 #     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 #     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 # )
+add_subdirectory(clients/Consumer_end)
+add_subdirectory(Server_end)
+add_subdirectory(clients/Merchant_end)
