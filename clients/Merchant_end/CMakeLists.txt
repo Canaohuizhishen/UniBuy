@@ -5,25 +5,24 @@ cmake_minimum_required(VERSION 4.1.1)
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 set(CMAKE_CXX_MODULE_STD ON)
 
-project(UniBuy VERSION 0.1 LANGUAGES CXX)
+project(Merchant_end VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 
-set(QT_FORCE_CMP0156_TO_VALUE NEW)
 
-qt_add_executable(appUniBuy)
+qt_add_executable(appMerchant_end)
 
-qt_add_qml_module(appUniBuy
-    URI UniBuy
+qt_add_qml_module(appMerchant_end
+    URI Merchant_end
     VERSION 1.0
     SOURCES     main.cpp
     QML_FILES   Main.qml
 )
 
-target_sources(appUniBuy
+target_sources(appMerchant_end
     PRIVATE
         #math.cpp                   # 实现单元
     PRIVATE FILE_SET cxx_modules TYPE CXX_MODULES  FILES
@@ -34,16 +33,16 @@ source_group("QML Files" FILES
     Main.qml
 )
 
-target_compile_features(appUniBuy PRIVATE cxx_std_23)
+target_compile_features(appMerchant_end PRIVATE cxx_std_23)
 
-target_link_libraries(appUniBuy
+target_link_libraries(appMerchant_end
     PRIVATE
         Qt6::Quick
 )
 
-set_target_properties(appUniBuy PROPERTIES
+set_target_properties(appMerchant_end PROPERTIES
     AUTORCC TRUE                              #  set(CMAKE_AUTORCC ON)
-#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appUniBuy
+#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appMerchant_end
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
@@ -51,7 +50,7 @@ set_target_properties(appUniBuy PROPERTIES
 )
 
 include(GNUInstallDirs)
-install(TARGETS appUniBuy
+install(TARGETS appMerchant_end
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -107,7 +106,7 @@ install(TARGETS appUniBuy
 
 
 # set(CMAKE_CXX_STANDARD_REQUIRED ON) # Globally preventing the fallback behaviour of C++ standard
-#qt_add_executable(UniBuy)  //Creates and finalizes an application target of a platform-specific type.
+#qt_add_executable(Merchant_end)  //Creates and finalizes an application target of a platform-specific type.
 #This command performs the following tasks:
 #    1. Create a CMake target of the appropriate type for the target platform.
 #    2. Link the target to the Qt::Core library.
@@ -124,7 +123,7 @@ install(TARGETS appUniBuy
 
 # cmake_minimum_required(VERSION 3.16)
 #
-# project(UniBuy VERSION 0.1 LANGUAGES CXX)
+# project(Merchant_end VERSION 0.1 LANGUAGES CXX)
 #
 # @if !false
 # set(CMAKE_AUTOMOC ON)
@@ -141,12 +140,12 @@ install(TARGETS appUniBuy
 # @endif
 # @endif
 #
-# qt_add_executable(appUniBuy
+# qt_add_executable(appMerchant_end
 #     main.cpp
 # )
 #
-# qt_add_qml_module(appUniBuy
-#     URI UniBuy
+# qt_add_qml_module(appMerchant_end
+#     URI Merchant_end
 #     VERSION 1.0
 #     QML_FILES
 #         Main.qml
@@ -155,24 +154,21 @@ install(TARGETS appUniBuy
 # # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # # If you are developing for iOS or macOS you should consider setting an
 # # explicit, fixed bundle identifier manually though.
-# set_target_properties(appUniBuy PROPERTIES
-# #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appUniBuy
+# set_target_properties(appMerchant_end PROPERTIES
+# #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appMerchant_end
 #     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
 #     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 #     MACOSX_BUNDLE TRUE
 #     WIN32_EXECUTABLE TRUE
 # )
 #
-# target_link_libraries(appUniBuy
+# target_link_libraries(appMerchant_end
 #     PRIVATE Qt6::Quick
 # )
 #
 # include(GNUInstallDirs)
-# install(TARGETS appUniBuy
+# install(TARGETS appMerchant_end
 #     BUNDLE DESTINATION .
 #     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 #     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 # )
-add_subdirectory(clients/Consumer_end)
-add_subdirectory(Server_end)
-add_subdirectory(clients/Merchant_end)

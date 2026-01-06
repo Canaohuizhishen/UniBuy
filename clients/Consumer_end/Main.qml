@@ -5,7 +5,7 @@ ApplicationWindow {
     width: 640
     height: 480
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("Hello11111111 World")
     menuBar: MenuBar {
         Menu {
             title: qsTr("File")
@@ -22,7 +22,7 @@ ApplicationWindow {
 
     //Content Area
     TextArea {
-        text: qsTr("Hello000000 World")
+        text: qsTr("Hello World")
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
     }
