@@ -22,7 +22,10 @@ Item {
             productManagementPage.visible = true
             currentPage = productManagementPage
         }
-        orderManagementButton.onClicked: {}
+        orderManagementButton.onClicked: {
+            homePage.visible = false
+            orderManagementPage.visible = true
+            currentPage = orderManagementPage}
     }
 
     ProductManagementPage{
@@ -31,6 +34,17 @@ Item {
 
         backButton.onClicked: {
             productManagementPage.visible = false
+            homePage.visible = true
+            currentPage = homePage
+        }
+    }
+
+    OrderManagementPage {
+        id: orderManagementPage
+        visible: false
+
+        backButton.onClicked: {
+            orderManagementPage.visible = false
             homePage.visible = true
             currentPage = homePage
         }

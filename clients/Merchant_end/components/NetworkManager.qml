@@ -139,4 +139,39 @@ QtObject {
     function getProductCounts(callback) {
         sendRequest("GET", "/api/products/stats/counts", null, callback);
     }
+
+    // 订单管理API
+    function getOrders(status, callback) {
+        var endpoint = "/api/orders";
+        if (status && status !== "全部") {
+            endpoint += "?status=" + encodeURIComponent(status);
+        }
+        sendRequest("GET", endpoint, null, callback);
+    }
+
+    function getOrder(orderId, callback) {
+        sendRequest("GET", "/api/orders/" + orderId, null, callback);
+    }
+
+    function createOrder(orderData, callback) {
+        sendRequest("POST", "/api/orders", orderData, callback);
+    }
+
+    function shipOrder(orderId, trackingNo, callback) {
+        sendRequest("POST", "/api/orders/" + orderId + "/ship",
+                    {trackingNo: trackingNo}, callback);
+    }
+
+    function cancelOrder(orderId, callback) {
+        sendRequest("POST", "/api/orders/" + orderId + "/cancel", null, callback);
+    }
+
+    function getOrderCounts(callback) {
+        sendRequest("GET", "/api/orders/stats/counts", null, callback);
+    }
+
+    function searchOrders(keyword, callback) {
+        sendRequest("GET", "/api/orders/search?keyword=" + encodeURIComponent(keyword),
+                    null, callback);
+    }
 }
