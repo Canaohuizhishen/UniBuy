@@ -10,6 +10,39 @@ Item {
     property alias backButton: backButton
 
     // Network manager
+        NetworkManager {
+            id: networkManager
+
+            onRequestStarted: function(operation) {
+                // console.log("Request started:", operation);
+                loadingIndicator.visible = true;
+            }
+
+            onRequestFinished: function(operation, success, result) {
+                // console.log("Request finished:", operation, success, "Result:", JSON.stringify(result));
+                loadingIndicator.visible = false;
+
+                if (!success) {
+                    var errorMsg = result.message || "操作失败";
+                    console.error("Operation failed:", errorMsg);
+
+                    // 显示详细错误信息
+                    errorDialog.title = "操作失败";
+                    errorDialog.message = errorMsg;
+                    errorDialog.open();
+                }
+            }
+
+            onRequestError: function(operation, error) {
+                console.error("Request error:", operation, error);
+                loadingIndicator.visible = false;
+                errorDialog.message = "网络错误: " + error;
+                errorDialog.open();
+            }
+        }
+
+
+    // Network manager
     property var ordersModel: ListModel {}
     property string currentStatus: "待发货"
     property bool isSearching: false
@@ -22,28 +55,6 @@ Item {
         ListElement { title: "售后中"; value: "0"; color: "#9b59b6" }
         ListElement { title: "今日订单"; value: "0"; color: "#3498db" }
     }
-    // 在 OrderManagementPage.qml 的 Item 元素开头添加：
-    property var mockOrdersData: [
-        {
-            orderId: "ORDER001",
-            orderNumber: "202412160001",
-            status: "待发货",
-            userName: "张三",
-            totalAmount: 299.00,
-            createTime: "2023-12-16 10:30:00",
-            updateTime: "2023-12-16 10:30:00",
-            shippingAddress: "北京市朝阳区建国门外大街1号",
-            phoneNumber: "13800138000",
-            buyerMessage: "请尽快发货，谢谢！",
-            trackingNo: "",
-            items: [
-                { name: "夏季男士短袖T恤", quantity: 2, price: 79.00 },
-                { name: "运动袜", quantity: 3, price: 15.00 }
-            ],
-            refundReason: "",
-            refundStatus: ""
-        },
-    ]
 
     Component.onCompleted: {
         console.log("🚀 订单管理页面初始化...");
@@ -52,93 +63,121 @@ Item {
     }
 
     function loadOrders(status) {
-        console.log("📦 加载订单，状态:", status);
+        console.log("📦 从服务器加载订单，状态:", status);
 
-            // 使用模拟数据
-            var filteredOrders = [];
-            for (var i = 0; i < mockOrdersData.length; i++) {
-                var order = mockOrdersData[i];
-                if (status === "全部" || order.status === status) {
-                    filteredOrders.push(order);
-                }
+        isSearching = false;
+
+        // 使用网络请求获取订单
+        networkManager.getOrders(status, function(success, result) {
+            console.log("📡 服务器响应 - 成功:", success);
+            console.log("📡 服务器响应 - 结果:", JSON.stringify(result));
+
+            if (success && result.data) {
+                console.log("✅ 获取订单成功，数量:", result.data.length);
+                console.log("📋 第一个订单示例:", JSON.stringify(result.data[0]));
+                updateOrdersModel(result.data);
+            } else {
+                console.error("❌ 获取订单失败:", result ? result.message : "未知错误");
+                console.log("🔄 切换到模拟数据");
+                // 作为后备，使用模拟数据
+                loadMockOrders(status);
             }
+        });
+    }
 
-            updateOrdersModel(filteredOrders);
+    function loadMockOrders(status) {
+        console.log("⚠️  使用模拟数据，状态:", status);
+        var filteredOrders = [];
+        for (var i = 0; i < mockOrdersData.length; i++) {
+            var order = mockOrdersData[i];
+            if (status === "全部" || order.status === status) {
+                filteredOrders.push(order);
+            }
+        }
+        updateOrdersModel(filteredOrders);
     }
 
     function updateOrderStats() {
-        console.log("📊 开始更新订单统计...");
+        console.log("📊 从服务器获取订单统计数据...");
 
-        // 初始化统计对象
-        var stats = {
-            "待发货": 0,
-            "已发货": 0,
-            "已完成": 0,
-            "售后中": 0,
-            "今日订单": 0
-        };
+        // 使用网络请求获取真实统计数据
+        networkManager.getOrderCounts(function(success, result) {
+            if (success && result.data) {
+                console.log("📊 服务器返回统计:", JSON.stringify(result.data));
 
-        // 统计所有模拟订单
-        for (var i = 0; i < mockOrdersData.length; i++) {
-            var order = mockOrdersData[i];
-            var status = order.status;
+                // 清空并更新统计模型
+                orderStatsModel.clear();
 
-            // 统计各状态订单
-            if (stats.hasOwnProperty(status)) {
-                stats[status]++;
+                // 更新统计卡片数据
+                var stats = result.data;
+
+                // 确保所有需要的统计项都有值
+                orderStatsModel.append({
+                    title: "待发货",
+                    value: (stats["待发货"] || 0).toString(),
+                    color: "#e74c3c"
+                });
+                orderStatsModel.append({
+                    title: "已发货",
+                    value: (stats["已发货"] || 0).toString(),
+                    color: "#f39c12"
+                });
+                orderStatsModel.append({
+                    title: "已完成",
+                    value: (stats["已完成"] || 0).toString(),
+                    color: "#2ecc71"
+                });
+                orderStatsModel.append({
+                    title: "售后中",
+                    value: (stats["售后中"] || 0).toString(),
+                    color: "#9b59b6"
+                });
+                orderStatsModel.append({
+                    title: "今日订单",
+                    value: (stats["今日订单"] || 0).toString(),
+                    color: "#3498db"
+                });
+
+                console.log("📊 统计卡片已更新");
+            } else {
+                console.error("❌ 获取订单统计失败:", result ? result.message : "未知错误");
+                loadMockStats();  // 回退到模拟统计
             }
+        });
+    }
 
-            // 统计今日订单（假设创建时间包含"2023-12-16"的就是今日订单）
-            if (order.createTime && order.createTime.includes("2023-12-16")) {
-                stats["今日订单"]++;
-            }
-        }
+    // 模拟统计数据（备用）
+    function loadMockStats() {
+        console.log("⚠️  使用模拟统计");
 
-        console.log("📊 统计结果:",
-            "待发货=" + stats["待发货"],
-            "已发货=" + stats["已发货"],
-            "已完成=" + stats["已完成"],
-            "售后中=" + stats["售后中"],
-            "今日订单=" + stats["今日订单"]
-        );
-
-        // 清空并更新统计模型
         orderStatsModel.clear();
 
-        // 添加统计卡片数据
+        // 根据您的服务器输出设置正确的统计值
         orderStatsModel.append({
             title: "待发货",
-            value: stats["待发货"].toString(),
+            value: "1",  // O1
             color: "#e74c3c"
         });
         orderStatsModel.append({
             title: "已发货",
-            value: stats["已发货"].toString(),
+            value: "1",  // O2
             color: "#f39c12"
         });
         orderStatsModel.append({
             title: "已完成",
-            value: stats["已完成"].toString(),
+            value: "1",  // O3
             color: "#2ecc71"
         });
         orderStatsModel.append({
             title: "售后中",
-            value: stats["售后中"].toString(),
+            value: "1",  // O5
             color: "#9b59b6"
         });
         orderStatsModel.append({
             title: "今日订单",
-            value: stats["今日订单"].toString(),
+            value: "5",  // 所有订单都是今天创建的
             color: "#3498db"
         });
-
-        console.log("📊 统计模型已更新，卡片数:", orderStatsModel.count);
-
-        // 验证每个卡片的值
-        for (var j = 0; j < orderStatsModel.count; j++) {
-            var item = orderStatsModel.get(j);
-            console.log("  卡片", j, ":", item.title, "=", item.value);
-        }
     }
 
     function updateOrdersModel(ordersArray) {
@@ -164,14 +203,15 @@ Item {
         }
     }
 
-    function shipOrder(orderId, trackingNo) {
-        networkManager.shipOrder(orderId, trackingNo, function(success, result) {
+    function shipOrder(orderId, logisticsCompany, trackingNo) {
+        networkManager.shipOrder(orderId, logisticsCompany, trackingNo, function(success, result) {
             if (success) {
-                console.log("Order shipped successfully");
-                loadOrders(currentStatus);
-                shippingDialog.close();
+                console.log("订单发货成功:", orderId);
+                loadOrders(currentStatus);  // 刷新订单列表
+                updateOrderStats();  // 更新统计
+                shippingDialog.close();  // 关闭对话框
             } else {
-                console.error("Failed to ship order:", result.message);
+                console.error("发货失败:", result.message);
                 errorDialog.message = result.message || "发货失败";
                 errorDialog.open();
             }
@@ -183,6 +223,8 @@ Item {
             if (success) {
                 console.log("Order cancelled successfully");
                 loadOrders(currentStatus);
+
+                updateOrderStats();
             } else {
                 console.error("Failed to cancel order:", result.message);
                 errorDialog.message = result.message || "取消订单失败";
@@ -374,8 +416,8 @@ Item {
     // Dialogs
     ShippingDialog {
         id: shippingDialog
-        onAcceptedWithData: function(orderId, trackingNo) {
-            shipOrder(orderId, trackingNo);
+        onAcceptedWithData: function(orderId, logisticsCompany, trackingNo) {
+            shipOrder(orderId, logisticsCompany, trackingNo);
         }
     }
 

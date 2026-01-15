@@ -28,6 +28,21 @@ private:
     void handleGetCategories(const Request& req, Response& res);  // 处理获取商品分类请求
     void handleHealthCheck(const Request& req, Response& res);  // 处理健康检查请求
 
+    // 订单管理路由处理函数
+    void handleGetOrders(const Request& req, Response& res);
+    void handleGetOrder(const Request& req, Response& res);
+    void handleCreateOrder(const Request& req, Response& res);
+    void handleUpdateOrder(const Request& req, Response& res);
+    void handleDeleteOrder(const Request& req, Response& res);
+    void handleShipOrder(const Request& req, Response& res);
+    void handleCancelOrder(const Request& req, Response& res);
+    void handleCompleteOrder(const Request& req, Response& res);
+    void handleRefundOrder(const Request& req, Response& res);
+    void handleSearchOrders(const Request& req, Response& res);
+    void handleGetOrderCounts(const Request& req, Response& res);
+    void handleGetOrdersByDateRange(const Request& req, Response& res);
+    void handleGetOrdersByUser(const Request& req, Response& res);
+
 public:
     HTTPServer(int port = 8080);
     void start();

@@ -4,6 +4,7 @@
 #include "./broker/productbroker.h"
 #include "./entities/product.h"
 #include "./network/httpserver.h"
+#include "./broker/orderbroker.h"
 
 void initializeTestData() {
     std::cout << "📦 正在添加初始测试商品..." << std::endl;
@@ -57,6 +58,10 @@ void initializeTestData() {
     } catch (const std::exception& e) {
         std::cerr << "❌ 添加测试商品时出错: " << e.what() << std::endl;
     }
+
+    // 初始化订单测试数据
+    std::cout << "\n📋 正在添加初始测试订单..." << std::endl;
+    OrderBroker::initializeTestData();
 }
 
 int main() {

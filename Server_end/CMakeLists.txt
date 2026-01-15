@@ -18,6 +18,10 @@ add_executable(Server_end
     broker/productbroker.h broker/productbroker.cpp
     controllers/manageproductscontroller.h controllers/manageproductscontroller.cpp
     network/httpserver.h network/httpserver.cpp
+    entities/order.h entities/order.cpp
+    broker/orderbroker.h broker/orderbroker.cpp
+    controllers/manageordercontroller.h controllers/manageordercontroller.cpp
+    test_orders.js
 
 
 )
