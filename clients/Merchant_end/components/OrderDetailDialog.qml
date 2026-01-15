@@ -36,12 +36,20 @@ Dialog {
 
             // 订单基本信息
             GroupBox {
-                title: "订单信息"
+                // title: "订单信息"
                 Layout.fillWidth: true
                 background: Rectangle {
                     radius: 8
                     color: "#f8f9fa"
                     border.color: "#e9ecef"
+                }
+
+                label: Label {
+                    text: "订单信息"
+                    color: "black"
+                    font.pixelSize: 16
+                    font.bold: true
+                    leftPadding: 5
                 }
 
                 GridLayout {
@@ -51,10 +59,10 @@ Dialog {
                     anchors.margins: 10
 
                     Text { text: "订单号：" }
-                    Text { text: currentOrder ? currentOrder.orderId : ""; font.bold: true }
+                    Text { text: currentOrder && currentOrder.orderId ? currentOrder.orderId : ""; font.bold: true; color: "black" }
 
                     Text { text: "下单时间：" }
-                    Text { text: currentOrder ? currentOrder.time : "" }
+                    Text { text: currentOrder && currentOrder.time ? currentOrder.time : ""; color: "black" }
 
                     Text { text: "订单状态：" }
                     Text {
@@ -73,7 +81,11 @@ Dialog {
 
                     Text { text: "订单金额：" }
                     Text {
-                        text: currentOrder ? currentOrder.total : ""
+                        text: {
+                            if (!currentOrder) return "¥0.00"
+                            var amount = currentOrder.totalAmount || currentOrder.total || 0
+                            return "¥" + amount.toFixed(2)
+                        }
                         color: "#e74c3c"
                         font.bold: true
                         font.pixelSize: 16
@@ -83,12 +95,20 @@ Dialog {
 
             // 收货信息
             GroupBox {
-                title: "收货信息"
+                // title: "收货信息"
                 Layout.fillWidth: true
                 background: Rectangle {
                     radius: 8
                     color: "#f8f9fa"
                     border.color: "#e9ecef"
+                }
+
+                label: Label {
+                    text: "收货信息"
+                    color: "black"
+                    font.pixelSize: 16
+                    font.bold: true
+                    leftPadding: 5
                 }
 
                 ColumnLayout {
@@ -116,12 +136,20 @@ Dialog {
 
             // 商品信息
             GroupBox {
-                title: "商品信息"
+                // title: "商品信息"
                 Layout.fillWidth: true
                 background: Rectangle {
                     radius: 8
                     color: "#f8f9fa"
                     border.color: "#e9ecef"
+                }
+
+                label: Label {
+                    text: "商品信息"
+                    color: "black"
+                    font.pixelSize: 16
+                    font.bold: true
+                    leftPadding: 5
                 }
 
 
@@ -138,7 +166,8 @@ Dialog {
                             anchors.margins: 10
 
                             Text {
-                                text: model.name
+                                // text: model.name
+                                text: model.productName ? model.productName : (model.name ? model.name : "未知商品")
                                 Layout.fillWidth: true
                             }
 
@@ -158,7 +187,7 @@ Dialog {
 
             // 物流信息
             GroupBox {
-                title: "物流信息"
+                // title: "物流信息"
                 visible: currentOrder &&
                        (currentOrder.status === "待收货" ||
                         currentOrder.status === "已完成" ||
@@ -169,6 +198,14 @@ Dialog {
                     color: "#f8f9fa"
                     border.color: "#e9ecef"
                 }
+
+                label: Label {
+                                    text: "物流信息"
+                                    color: "black"
+                                    font.pixelSize: 16
+                                    font.bold: true
+                                    leftPadding: 5
+                                }
 
                 ColumnLayout {
                     spacing: 5
@@ -184,7 +221,13 @@ Dialog {
                             text: "复制单号"
                             background: Rectangle {
                                 radius: 6
-                                color: parent.down ? "#e0e0e0" : "#f5f6fa"
+                                color: parent.down ? "#e0e0e0" : "#e5e6eb"
+                            }
+                            contentItem: Text {
+                                text: parent.text
+                                color: "black"
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
                             }
                             onClicked: copyToClipboard("SF123456789")
                         }
@@ -245,7 +288,13 @@ Dialog {
                     text: "联系买家"
                     background: Rectangle {
                         radius: 6
-                        color: parent.down ? "#e0e0e0" : "#f5f6fa"
+                        color: parent.down ? "#e0e0e0" : "#e5e6eb"
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "black"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                     }
                     onClicked: contactBuyer()
                 }

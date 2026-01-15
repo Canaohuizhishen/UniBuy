@@ -17,11 +17,13 @@ Dialog {
     }
 
     property var currentOrder: null
-    signal acceptedWithData(string orderId, string trackingNo)
+    property string selectedLogistics: "顺丰"
+    signal acceptedWithData(string orderId, string logisticsCompany, string trackingNo)
 
     function openWithOrder(order) {
         currentOrder = order
         waybillField.text = ""  // 清空运单号输入框
+        selectedLogistics = "顺丰"
         open()
     }
 
@@ -32,6 +34,7 @@ Dialog {
         Text {
             text: "订单号：" + (currentOrder ? currentOrder.orderId : "")
             font.bold: true
+            color: "black"
         }
 
         // 快递公司选择
@@ -44,6 +47,14 @@ Dialog {
                 border.color: "#e9ecef"
             }
 
+            label: Label {
+                text: parent.title
+                color: "black"
+                font.pixelSize: 16
+                font.bold: true
+                leftPadding: 5
+            }
+
             Grid {
                 columns: 3
                 spacing: 10
@@ -53,7 +64,33 @@ Dialog {
                     model: ["顺丰", "中通", "圆通", "申通", "韵达", "京东"]
                     delegate: RadioButton {
                         text: modelData
-                        checked: index === 0
+                        checked: modelData === dialog.selectedLogistics
+                        onClicked: dialog.selectedLogistics = modelData
+
+                        indicator: Rectangle {
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            radius: 10
+                            border.color: parent.checked ? "#3498db" : "#bdc3c7"
+                            border.width: 2
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 10
+                                height: 10
+                                radius: 5
+                                color: parent.parent.checked ? "#3498db" : "transparent"
+                                visible: parent.parent.checked
+                            }
+                        }
+                        contentItem: Text {
+                            text: modelData
+                            color: "black"
+                            font.pixelSize: 14
+                            verticalAlignment: Text.AlignVCenter
+                            leftPadding: indicator.width + spacing
+                        }
                     }
                 }
             }
@@ -69,6 +106,15 @@ Dialog {
                 border.color: "#e9ecef"
             }
 
+            label: Label {
+                text: parent.title
+                color: "black"
+                font.pixelSize: 16
+                font.bold: true
+                leftPadding: 5
+            }
+
+
             ColumnLayout {
                 spacing: 5
                 anchors.margins: 10
@@ -76,7 +122,9 @@ Dialog {
                 TextField {
                     id: waybillField
                     placeholderText: "请输入运单号"
+                    placeholderTextColor: "#666"
                     Layout.fillWidth: true
+                    color: "black"
                     background: Rectangle {
                         radius: 6
                         border.color: parent.activeFocus ? "#3498db" : "#bdc3c7"
@@ -95,13 +143,15 @@ Dialog {
 
     footer: DialogButtons {
         onAccepted: {
-            if (currentOrder && waybillField.text !== "") {
-                console.log("发货订单：", currentOrder.orderId, "运单号：", waybillField.text)
-                // 发出包含数据的信号
-                dialog.acceptedWithData(currentOrder.orderId, waybillField.text)
-                dialog.accept()
-            }
-        }
+                    if (currentOrder && waybillField.text !== "") {
+                        console.log("发货订单：", currentOrder.orderId,
+                                  "快递公司：", dialog.selectedLogistics,
+                                  "运单号：", waybillField.text)
+                        // 发出包含数据的信号
+                        dialog.acceptedWithData(currentOrder.orderId, dialog.selectedLogistics, waybillField.text)
+                        dialog.accept()
+                    }
+                }
         onRejected: dialog.reject()
     }
 }

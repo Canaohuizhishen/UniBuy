@@ -16,16 +16,16 @@ QtObject {
     // 请求方法
     function sendRequest(method, endpoint, data, callback) {
         var operation = method + " " + endpoint;
-        console.log("Queueing request:", operation);
+        // console.log("Queueing request:", operation);
 
         // 将请求加入队列
         pendingRequests.push({
-            method: method,
-            endpoint: endpoint,
-            data: data,
-            callback: callback,
-            operation: operation
-        });
+                                 method: method,
+                                 endpoint: endpoint,
+                                 data: data,
+                                 callback: callback,
+                                 operation: operation
+                             });
 
         // 如果没有正在处理的请求，开始处理队列
         if (!isProcessing) {
@@ -42,7 +42,7 @@ QtObject {
         isProcessing = true;
         var request = pendingRequests.shift();
 
-        console.log("Processing request:", request.operation);
+        // console.log("Processing request:", request.operation);
         requestStarted(request.operation);
 
         var xhr = new XMLHttpRequest();
@@ -60,11 +60,11 @@ QtObject {
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                console.log("Response received for:", request.operation, "Status:", xhr.status);
+                // console.log("Response received for:", request.operation, "Status:", xhr.status);
 
                 try {
                     var response = JSON.parse(xhr.responseText);
-                    console.log("Response success:", response.success);
+                    // console.log("Response success:", response.success);
 
                     if (xhr.status >= 200 && xhr.status < 300) {
                         requestFinished(request.operation, response.success, response);
@@ -92,7 +92,7 @@ QtObject {
 
         if (request.data) {
             var jsonData = JSON.stringify(request.data);
-            console.log("Request body length:", jsonData.length);
+            // console.log("Request body length:", jsonData.length);
             xhr.send(jsonData);
         } else {
             xhr.send();
@@ -129,7 +129,7 @@ QtObject {
     }
 
     function toggleProductStatus(productId, currentStatus, callback) {
-        console.log("Toggle status:", productId, currentStatus);
+        // console.log("Toggle status:", productId, currentStatus);
         // 确保发送正确的 JSON 数据
         var data = {currentStatus: currentStatus};
         sendRequest("POST", "/api/products/" + productId + "/toggle-status",
@@ -157,9 +157,12 @@ QtObject {
         sendRequest("POST", "/api/orders", orderData, callback);
     }
 
-    function shipOrder(orderId, trackingNo, callback) {
+    function shipOrder(orderId, logisticsCompany, trackingNumber, callback) {
         sendRequest("POST", "/api/orders/" + orderId + "/ship",
-                    {trackingNo: trackingNo}, callback);
+                    {
+                        logisticsCompany: logisticsCompany,
+                        trackingNumber: trackingNumber
+                    }, callback);
     }
 
     function cancelOrder(orderId, callback) {

@@ -109,7 +109,8 @@ Rectangle {
                             if (!orderData || !orderData.items || orderData.items.length === 0)
                                 return "商品：暂无商品"
                             var item = orderData.items[0]
-                            return "商品：" + item.productName + (orderData.items.length > 1 ? " 等" + orderData.items.length + "件商品" : "")
+                            return "商品：" + (item && item.productName ? item.productName : "未知商品") +
+                                   (orderData.items.length > 1 ? " 等" + orderData.items.length + "件商品" : "")
                         }
                         font.pixelSize: 12
                         color: "#666"
