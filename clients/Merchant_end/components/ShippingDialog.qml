@@ -17,9 +17,11 @@ Dialog {
     }
 
     property var currentOrder: null
+    signal acceptedWithData(string orderId, string trackingNo)
 
     function openWithOrder(order) {
         currentOrder = order
+        waybillField.text = ""  // 清空运单号输入框
         open()
     }
 
@@ -95,6 +97,8 @@ Dialog {
         onAccepted: {
             if (currentOrder && waybillField.text !== "") {
                 console.log("发货订单：", currentOrder.orderId, "运单号：", waybillField.text)
+                // 发出包含数据的信号
+                dialog.acceptedWithData(currentOrder.orderId, waybillField.text)
                 dialog.accept()
             }
         }

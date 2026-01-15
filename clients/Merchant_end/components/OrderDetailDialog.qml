@@ -1,13 +1,12 @@
-//订单详情对话框
+// OrderDetailDialog.qml
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-
 Dialog {
     id: dialog
     title: "订单详情"
     width: 600
-    height: 500
+    height: 550
 
     // 圆角背景
     background: Rectangle {
@@ -125,28 +124,33 @@ Dialog {
                     border.color: "#e9ecef"
                 }
 
-                ListView {
-                    width: parent.width
-                    height: childrenRect.height
-                    model: currentOrder ? currentOrder.items : null
-                    delegate: RowLayout {
+
+                ScrollView {  // 添加滚动视图
+                    anchors.fill: parent
+                    anchors.margins: 5  // 添加一些边距
+
+                    ListView {
                         width: parent.width
-                        spacing: 10
-                        anchors.margins: 10
+                        model: currentOrder ? currentOrder.items : null
+                        delegate: RowLayout {
+                            width: parent.width
+                            spacing: 10
+                            anchors.margins: 10
 
-                        Text {
-                            text: model.name
-                            Layout.fillWidth: true
-                        }
+                            Text {
+                                text: model.name
+                                Layout.fillWidth: true
+                            }
 
-                        Text {
-                            text: "×" + model.quantity
-                            color: "#666"
-                        }
+                            Text {
+                                text: "×" + model.quantity
+                                color: "#666"
+                            }
 
-                        Text {
-                            text: model.price
-                            color: "#e74c3c"
+                            Text {
+                                text: model.price
+                                color: "#e74c3c"
+                            }
                         }
                     }
                 }
@@ -234,6 +238,7 @@ Dialog {
             // 操作按钮区域
             RowLayout {
                 Layout.alignment: Qt.AlignRight
+                Layout.topMargin: 50
                 spacing: 8
 
                 Button {

@@ -1,16 +1,22 @@
-//订单项
+// OrderItem.qml
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import "./"
 
 Rectangle {
+    id: orderItem
     property var orderData: null
     signal process(var order)
+    signal shipClicked(var order)     // 新增：发货信号
+    signal cancelClicked(var order)   // 新增：取消信号
 
-    radius: 12  // 增加圆角
+    radius: 12
     color: "white"
     border.color: "#eee"
+    border.width: 1
 
+    // 注意：这里使用ColumnLayout而不是Column
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 15
@@ -18,31 +24,55 @@ Rectangle {
 
         // 订单头部信息
         RowLayout {
+            Layout.fillWidth: true
+
             Text {
-                text: orderData ? "订单号：" + orderData.orderId : ""
+                text: orderData ? "订单号：" + orderData.orderNumber : ""
                 font.bold: true
+                font.pixelSize: 14
             }
 
             Item { Layout.fillWidth: true }
 
             Text {
-                text: orderData ? orderData.time : ""
+                text: orderData ? orderData.createTime : ""
                 color: "#666"
                 font.pixelSize: 12
             }
 
-            // 使用状态标签组件
-            StatusBadge {
-                status: orderData ? orderData.status : ""
+            // 状态标签
+            Rectangle {
+                width: Math.max(60, (orderData ? orderData.status : "").length * 10 + 20)
+                height: 24
+                radius: 12
+                color: {
+                    if (!orderData) return "#95a5a6"
+                    switch(orderData.status) {
+                    case "待付款": case "已取消": return "#95a5a6"
+                    case "待发货": return "#e74c3c"
+                    case "已发货": return "#f39c12"
+                    case "已完成": return "#2ecc71"
+                    case "售后中": return "#9b59b6"
+                    default: return "#3498db"
+                    }
+                }
+
+                Text {
+                    text: orderData ? orderData.status : ""
+                    color: "white"
+                    font.pixelSize: 10
+                    font.bold: true
+                    anchors.centerIn: parent
+                }
             }
         }
 
         // 商品信息
         Rectangle {
             Layout.fillWidth: true
-            height: 80
+            Layout.preferredHeight: 80
             color: "#f9f9f9"
-            radius: 8  // 增加圆角
+            radius: 8
 
             RowLayout {
                 anchors.fill: parent
@@ -50,10 +80,10 @@ Rectangle {
 
                 // 商品图片区域
                 Rectangle {
-                    width: 60
-                    height: 60
+                    Layout.preferredWidth: 60
+                    Layout.preferredHeight: 60
                     color: "#f0f0f0"
-                    radius: 6  // 增加圆角
+                    radius: 6
 
                     Text {
                         text: "📦"
@@ -64,11 +94,11 @@ Rectangle {
 
                 ColumnLayout {
                     Layout.fillWidth: true
+                    Layout.fillHeight: true
                     spacing: 5
 
                     Text {
-                        text: orderData && orderData.items && orderData.items.length > 0 ?
-                              orderData.items[0].name : ""
+                        text: "买家：" + (orderData ? orderData.userName : "")
                         font.pixelSize: 14
                         elide: Text.ElideRight
                         Layout.fillWidth: true
@@ -76,23 +106,28 @@ Rectangle {
 
                     Text {
                         text: {
-                            if (!orderData || !orderData.items || orderData.items.length === 0) return ""
+                            if (!orderData || !orderData.items || orderData.items.length === 0)
+                                return "商品：暂无商品"
                             var item = orderData.items[0]
-                            return "数量：" + item.quantity + "  单价：" + item.price
+                            return "商品：" + item.productName + (orderData.items.length > 1 ? " 等" + orderData.items.length + "件商品" : "")
                         }
                         font.pixelSize: 12
                         color: "#666"
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
                     }
 
                     Text {
-                        text: orderData ? "买家：" + orderData.customer : ""
+                        text: "地址：" + (orderData ? orderData.shippingAddress : "")
                         font.pixelSize: 12
                         color: "#666"
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
                     }
                 }
 
                 Text {
-                    text: orderData ? orderData.total : ""
+                    text: "¥" + (orderData ? orderData.totalAmount : 0)
                     font.pixelSize: 18
                     color: "#e74c3c"
                     font.bold: true
@@ -102,36 +137,89 @@ Rectangle {
 
         // 操作按钮
         RowLayout {
+            Layout.fillWidth: true
             Layout.alignment: Qt.AlignRight
             spacing: 8
 
-            StyledButton {
-                text: "查看详情"
-                buttonType: "ghost"
-                buttonWidth: 90
-                buttonHeight: 32
+            // 查看详情按钮
+            Rectangle {
+                width: 90
+                height: 32
                 radius: 6
-                onClicked: process(orderData)
-            }
+                color: "#f5f6fa"
+                border.color: "#d1d5db"
+                border.width: 1
 
-            StyledButton {
-                text: {
-                    if (!orderData) return ""
-                    switch(orderData.status) {
-                        case "待发货": return "发货"
-                        case "待收货": return "确认收货"
-                        case "退款售后": return "处理售后"
-                        default: return "处理"
+                Text {
+                    text: "查看详情"
+                    color: "#3498db"
+                    font.pixelSize: 12
+                    anchors.centerIn: parent
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (orderData) {
+                            process(orderData)
+                        }
                     }
                 }
-                buttonType: "primary"
-                buttonWidth: 90
-                buttonHeight: 32
+            }
+
+            // 发货按钮
+            Rectangle {
+                width: 90
+                height: 32
                 radius: 6
-                visible: orderData &&
-                        orderData.status !== "已完成" &&
-                        orderData.status !== "已取消"
-                onClicked: process(orderData)
+                color: "#3498db"
+                visible: orderData && orderData.status === "待发货"
+
+                Text {
+                    text: "发货"
+                    color: "white"
+                    font.pixelSize: 12
+                    anchors.centerIn: parent
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (orderData) {
+                            shipClicked(orderData)
+                        }
+                    }
+                }
+            }
+
+            // 取消按钮
+            Rectangle {
+                width: 90
+                height: 32
+                radius: 6
+                color: "#f5f6fa"
+                border.color: "#d1d5db"
+                border.width: 1
+                visible: orderData && (orderData.status === "待付款" || orderData.status === "待发货")
+
+                Text {
+                    text: "取消"
+                    color: "#e74c3c"
+                    font.pixelSize: 12
+                    anchors.centerIn: parent
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (orderData) {
+                            cancelClicked(orderData)
+                        }
+                    }
+                }
             }
         }
     }
