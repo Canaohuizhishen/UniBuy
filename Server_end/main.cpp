@@ -5,6 +5,7 @@
 #include "./entities/product.h"
 #include "./network/httpserver.h"
 #include "./broker/orderbroker.h"
+#include "./controllers/ordercontroller.h"
 
 void initializeTestData() {
     std::cout << "📦 正在添加初始测试商品..." << std::endl;

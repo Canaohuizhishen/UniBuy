@@ -1,5 +1,7 @@
 #include "httpserver.h"
 #include "../controllers/manageordercontroller.h"
+#include "../controllers/ordercontroller.h"
+#include "../controllers/shoppingcontroller.h"
 
 using json = nlohmann::json;
 
@@ -135,10 +137,112 @@ void HTTPServer::setupRoutes() {
     });
 
     // 获取用户订单
-    svr.Get(R"(/api/orders/user/([A-Za-z0-9]+))", [this](const Request& req, Response& res) {
+    svr.Get(R"(/api/orders/user/([A-Za-z0-9_]+))", [this](const Request& req, Response& res) {
         handleGetOrdersByUser(req, res);
     });
+
+    // 消费者订单API
+    svr.Get("/api/consumer/orders", [this](const Request& req, Response& res) {
+        handleConsumerGetOrders(req, res);
+    });
+
+    svr.Get(R"(/api/consumer/orders/status/([^/]+))", [this](const Request& req, Response& res) {
+        handleConsumerGetOrdersByStatus(req, res);
+    });
+
+    svr.Get(R"(/api/consumer/orders/([^/]+))", [this](const Request& req, Response& res) {
+        handleConsumerGetOrder(req, res);
+    });
+
+    svr.Post(R"(/api/consumer/orders/([^/]+)/cancel)", [this](const Request& req, Response& res) {
+        handleConsumerCancelOrder(req, res);
+    });
+
+    svr.Post(R"(/api/consumer/orders/([^/]+)/confirm-receipt)", [this](const Request& req, Response& res) {
+        handleConsumerConfirmReceipt(req, res);
+    });
+
+    svr.Get(R"(/api/consumer/orders/([^/]+)/logistics)", [this](const Request& req, Response& res) {
+        handleConsumerGetLogisticsInfo(req, res);
+    });
+
+    svr.Post(R"(/api/consumer/orders/([^/]+)/service-request)", [this](const Request& req, Response& res) {
+        handleConsumerCreateServiceRequest(req, res);
+    });
+
+    svr.Get(R"(/api/consumer/orders/([^/]+)/service-requests)", [this](const Request& req, Response& res) {
+        handleConsumerGetServiceRequests(req, res);
+    });
+
+    svr.Post(R"(/api/consumer/orders/([^/]+)/review)", [this](const Request& req, Response& res) {
+        handleConsumerAddReview(req, res);
+    });
+
+    svr.Get("/api/consumer/orders/search", [this](const Request& req, Response& res) {
+        handleConsumerSearchOrders(req, res);
+    });
+
+    svr.Get("/api/consumer/orders/stats/counts", [this](const Request& req, Response& res) {
+        handleConsumerGetOrderCounts(req, res);
+    });
+
+    // 购物相关API
+    svr.Get("/api/shopping/products", [this](const Request& req, Response& res) {
+        handleShoppingGetProducts(req, res);
+    });
+
+    svr.Get(R"(/api/shopping/products/([A-Za-z0-9]+))", [this](const Request& req, Response& res) {
+        handleShoppingGetProductDetail(req, res);
+    });
+
+    svr.Get("/api/shopping/products/search", [this](const Request& req, Response& res) {
+        handleShoppingSearchProducts(req, res);
+    });
+
+    svr.Get("/api/shopping/products/stats/counts", [this](const Request& req, Response& res) {
+        handleShoppingGetProductCounts(req, res);
+    });
+
+    // 购物车API
+    svr.Get(R"(/api/cart/([A-Za-z0-9_]+))", [this](const Request& req, Response& res) {
+        handleGetCart(req, res);
+    });
+
+    svr.Post(R"(/api/cart/([A-Za-z0-9_]+)/add)", [this](const Request& req, Response& res) {
+        handleAddToCart(req, res);
+    });
+
+    svr.Put(R"(/api/cart/([A-Za-z0-9_]+)/item/([A-Za-z0-9]+))", [this](const Request& req, Response& res) {
+        handleUpdateCartItem(req, res);
+    });
+
+    svr.Delete(R"(/api/cart/([A-Za-z0-9_]+)/item/([A-Za-z0-9]+))", [this](const Request& req, Response& res) {
+        handleRemoveFromCart(req, res);
+    });
+
+    svr.Delete(R"(/api/cart/([A-Za-z0-9_]+)/product/([A-Za-z0-9]+))", [this](const Request& req, Response& res) {
+        handleRemoveProductFromCart(req, res);
+    });
+
+    svr.Delete(R"(/api/cart/([A-Za-z0-9_]+)/clear)", [this](const Request& req, Response& res) {
+        handleClearCart(req, res);
+    });
+
+    svr.Get(R"(/api/cart/([A-Za-z0-9_]+)/summary)", [this](const Request& req, Response& res) {
+        handleGetCartSummary(req, res);
+    });
+
+    svr.Post(R"(/api/cart/([A-Za-z0-9_]+)/checkout)", [this](const Request& req, Response& res) {
+        handleCheckoutCart(req, res);
+    });
+
+    // 直接购买API
+    svr.Post("/api/shopping/direct-purchase", [this](const Request& req, Response& res) {
+        handleDirectPurchase(req, res);
+    });
+
 }
+
 
 void HTTPServer::handleOptionsRequest(const Request& req, Response& res) {
     res.set_header("Access-Control-Allow-Origin", "*");
@@ -445,4 +549,257 @@ void HTTPServer::handleGetOrdersByUser(const Request& req, Response& res) {
     res.set_header("Content-Type", "application/json");
     std::string userId = req.matches[1];
     res.set_content(OrderManagementController::getOrdersByUser(userId), "application/json");
+}
+
+void HTTPServer::handleConsumerGetOrders(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    res.set_content(OrderController::getConsumerOrders(), "application/json");
+}
+
+void HTTPServer::handleConsumerGetOrdersByStatus(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string status = req.matches[1];
+    res.set_content(OrderController::getConsumerOrdersByStatus(status), "application/json");
+}
+
+void HTTPServer::handleConsumerGetOrder(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string orderId = req.matches[1];
+    res.set_content(OrderController::getConsumerOrder(orderId), "application/json");
+}
+
+void HTTPServer::handleConsumerCancelOrder(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string orderId = req.matches[1];
+    res.set_content(OrderController::cancelConsumerOrder(orderId), "application/json");
+}
+
+void HTTPServer::handleConsumerConfirmReceipt(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string orderId = req.matches[1];
+    res.set_content(OrderController::confirmReceipt(orderId), "application/json");
+}
+
+void HTTPServer::handleConsumerGetLogisticsInfo(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string orderId = req.matches[1];
+    res.set_content(OrderController::getLogisticsInfo(orderId), "application/json");
+}
+
+void HTTPServer::handleConsumerCreateServiceRequest(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    if (req.has_header("Content-Type") &&
+        req.get_header_value("Content-Type").find("application/json") != std::string::npos) {
+        std::string orderId = req.matches[1];
+        try {
+            nlohmann::json body = nlohmann::json::parse(req.body);
+            res.set_content(OrderController::createServiceRequest(orderId, body), "application/json");
+        } catch (const std::exception& e) {
+            nlohmann::json response;
+            response["success"] = false;
+            response["message"] = "无效的JSON数据";
+            res.set_content(response.dump(), "application/json");
+        }
+    } else {
+        nlohmann::json response;
+        response["success"] = false;
+        response["message"] = "Content-Type必须为application/json";
+        res.set_content(response.dump(), "application/json");
+    }
+}
+
+void HTTPServer::handleConsumerGetServiceRequests(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string orderId = req.matches[1];
+    res.set_content(OrderController::getServiceRequests(orderId), "application/json");
+}
+
+void HTTPServer::handleConsumerAddReview(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    if (req.has_header("Content-Type") &&
+        req.get_header_value("Content-Type").find("application/json") != std::string::npos) {
+        std::string orderId = req.matches[1];
+        try {
+            nlohmann::json body = nlohmann::json::parse(req.body);
+            res.set_content(OrderController::addReview(orderId, body), "application/json");
+        } catch (const std::exception& e) {
+            nlohmann::json response;
+            response["success"] = false;
+            response["message"] = "无效的JSON数据";
+            res.set_content(response.dump(), "application/json");
+        }
+    } else {
+        nlohmann::json response;
+        response["success"] = false;
+        response["message"] = "Content-Type必须为application/json";
+        res.set_content(response.dump(), "application/json");
+    }
+}
+
+void HTTPServer::handleConsumerSearchOrders(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string keyword = req.get_param_value("keyword");
+    if (!keyword.empty()) {
+        res.set_content(OrderController::searchConsumerOrders(keyword), "application/json");
+    } else {
+        nlohmann::json response;
+        response["success"] = false;
+        response["message"] = "必须提供关键字参数";
+        res.set_content(response.dump(), "application/json");
+    }
+}
+
+void HTTPServer::handleConsumerGetOrderCounts(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    res.set_content(OrderController::getConsumerOrderCounts(), "application/json");
+}
+
+void HTTPServer::handleShoppingGetProducts(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    res.set_content(ShoppingController::getAllProductsForShopping(), "application/json");
+}
+
+void HTTPServer::handleShoppingGetProductDetail(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string productId = req.matches[1];
+    res.set_content(ShoppingController::getProductDetailForShopping(productId), "application/json");
+}
+
+void HTTPServer::handleShoppingSearchProducts(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string keyword = req.get_param_value("keyword");
+    if (!keyword.empty()) {
+        res.set_content(ShoppingController::searchProductsForShopping(keyword), "application/json");
+    } else {
+        nlohmann::json response;
+        response["success"] = false;
+        response["message"] = "必须提供关键字参数";
+        res.set_content(response.dump(), "application/json");
+    }
+}
+
+void HTTPServer::handleShoppingGetProductCounts(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    res.set_content(ShoppingController::getProductCountsForShopping(), "application/json");
+}
+
+void HTTPServer::handleDirectPurchase(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    if (req.has_header("Content-Type") &&
+        req.get_header_value("Content-Type").find("application/json") != std::string::npos) {
+        try {
+            nlohmann::json body = nlohmann::json::parse(req.body);
+            std::string userId = body.value("userId", "user123"); // 默认用户ID
+            res.set_content(ShoppingController::directPurchase(userId, body), "application/json");
+        } catch (const std::exception& e) {
+            nlohmann::json response;
+            response["success"] = false;
+            response["message"] = "无效的JSON数据: " + std::string(e.what());
+            res.set_content(response.dump(), "application/json");
+        }
+    } else {
+        nlohmann::json response;
+        response["success"] = false;
+        response["message"] = "Content-Type必须为application/json";
+        res.set_content(response.dump(), "application/json");
+    }
+}
+
+void HTTPServer::handleGetCart(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string userId = req.matches[1];
+    res.set_content(ShoppingController::getCart(userId), "application/json");
+}
+
+void HTTPServer::handleAddToCart(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    if (req.has_header("Content-Type") &&
+        req.get_header_value("Content-Type").find("application/json") != std::string::npos) {
+        try {
+            std::string userId = req.matches[1];
+            nlohmann::json body = nlohmann::json::parse(req.body);
+            res.set_content(ShoppingController::addToCart(userId, body), "application/json");
+        } catch (const std::exception& e) {
+            nlohmann::json response;
+            response["success"] = false;
+            response["message"] = "无效的JSON数据";
+            res.set_content(response.dump(), "application/json");
+        }
+    } else {
+        nlohmann::json response;
+        response["success"] = false;
+        response["message"] = "Content-Type必须为application/json";
+        res.set_content(response.dump(), "application/json");
+    }
+}
+
+void HTTPServer::handleUpdateCartItem(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    if (req.has_header("Content-Type") &&
+        req.get_header_value("Content-Type").find("application/json") != std::string::npos) {
+        try {
+            std::string userId = req.matches[1];
+            std::string itemId = req.matches[2];
+            nlohmann::json body = nlohmann::json::parse(req.body);
+            res.set_content(ShoppingController::updateCartItem(userId, itemId, body), "application/json");
+        } catch (const std::exception& e) {
+            nlohmann::json response;
+            response["success"] = false;
+            response["message"] = "无效的JSON数据";
+            res.set_content(response.dump(), "application/json");
+        }
+    } else {
+        nlohmann::json response;
+        response["success"] = false;
+        response["message"] = "Content-Type必须为application/json";
+        res.set_content(response.dump(), "application/json");
+    }
+}
+
+void HTTPServer::handleRemoveFromCart(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string userId = req.matches[1];
+    std::string itemId = req.matches[2];
+    res.set_content(ShoppingController::removeFromCart(userId, itemId), "application/json");
+}
+
+void HTTPServer::handleRemoveProductFromCart(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string userId = req.matches[1];
+    std::string productId = req.matches[2];
+    res.set_content(ShoppingController::removeProductFromCart(userId, productId), "application/json");
+}
+
+void HTTPServer::handleClearCart(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string userId = req.matches[1];
+    res.set_content(ShoppingController::clearCart(userId), "application/json");
+}
+
+void HTTPServer::handleGetCartSummary(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    std::string userId = req.matches[1];
+    res.set_content(ShoppingController::getCartSummary(userId), "application/json");
+}
+
+void HTTPServer::handleCheckoutCart(const Request& req, Response& res) {
+    res.set_header("Content-Type", "application/json");
+    if (req.has_header("Content-Type") &&
+        req.get_header_value("Content-Type").find("application/json") != std::string::npos) {
+        try {
+            std::string userId = req.matches[1];
+            nlohmann::json body = nlohmann::json::parse(req.body);
+            res.set_content(ShoppingController::checkoutCart(userId, body), "application/json");
+        } catch (const std::exception& e) {
+            nlohmann::json response;
+            response["success"] = false;
+            response["message"] = "无效的JSON数据";
+            res.set_content(response.dump(), "application/json");
+        }
+    } else {
+        nlohmann::json response;
+        response["success"] = false;
+        response["message"] = "Content-Type必须为application/json";
+        res.set_content(response.dump(), "application/json");
+    }
 }
