@@ -78,23 +78,8 @@ Item {
                 updateOrdersModel(result.data);
             } else {
                 console.error("❌ 获取订单失败:", result ? result.message : "未知错误");
-                console.log("🔄 切换到模拟数据");
-                // 作为后备，使用模拟数据
-                loadMockOrders(status);
             }
         });
-    }
-
-    function loadMockOrders(status) {
-        console.log("⚠️  使用模拟数据，状态:", status);
-        var filteredOrders = [];
-        for (var i = 0; i < mockOrdersData.length; i++) {
-            var order = mockOrdersData[i];
-            if (status === "全部" || order.status === status) {
-                filteredOrders.push(order);
-            }
-        }
-        updateOrdersModel(filteredOrders);
     }
 
     function updateOrderStats() {
@@ -141,42 +126,7 @@ Item {
                 console.log("📊 统计卡片已更新");
             } else {
                 console.error("❌ 获取订单统计失败:", result ? result.message : "未知错误");
-                loadMockStats();  // 回退到模拟统计
             }
-        });
-    }
-
-    // 模拟统计数据（备用）
-    function loadMockStats() {
-        console.log("⚠️  使用模拟统计");
-
-        orderStatsModel.clear();
-
-        // 根据您的服务器输出设置正确的统计值
-        orderStatsModel.append({
-            title: "待发货",
-            value: "1",  // O1
-            color: "#e74c3c"
-        });
-        orderStatsModel.append({
-            title: "已发货",
-            value: "1",  // O2
-            color: "#f39c12"
-        });
-        orderStatsModel.append({
-            title: "已完成",
-            value: "1",  // O3
-            color: "#2ecc71"
-        });
-        orderStatsModel.append({
-            title: "售后中",
-            value: "1",  // O5
-            color: "#9b59b6"
-        });
-        orderStatsModel.append({
-            title: "今日订单",
-            value: "5",  // 所有订单都是今天创建的
-            color: "#3498db"
         });
     }
 

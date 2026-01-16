@@ -43,6 +43,36 @@ private:
     void handleGetOrdersByDateRange(const Request& req, Response& res);
     void handleGetOrdersByUser(const Request& req, Response& res);
 
+    //我的订单
+    void handleConsumerGetOrders(const Request& req, Response& res);
+    void handleConsumerGetOrdersByStatus(const Request& req, Response& res);
+    void handleConsumerGetOrder(const Request& req, Response& res);
+    void handleConsumerCancelOrder(const Request& req, Response& res);
+    void handleConsumerConfirmReceipt(const Request& req, Response& res);
+    void handleConsumerGetLogisticsInfo(const Request& req, Response& res);
+    void handleConsumerCreateServiceRequest(const Request& req, Response& res);
+    void handleConsumerGetServiceRequests(const Request& req, Response& res);
+    void handleConsumerAddReview(const Request& req, Response& res);
+    void handleConsumerSearchOrders(const Request& req, Response& res);
+    void handleConsumerGetOrderCounts(const Request& req, Response& res);
+
+    // 购物相关处理函数
+    void handleShoppingGetProducts(const Request& req, Response& res);
+    void handleShoppingGetProductDetail(const Request& req, Response& res);
+    void handleShoppingSearchProducts(const Request& req, Response& res);
+    void handleShoppingGetProductCounts(const Request& req, Response& res);
+    void handleDirectPurchase(const Request& req, Response& res);
+
+    // 购物车处理函数
+    void handleGetCart(const Request& req, Response& res);
+    void handleAddToCart(const Request& req, Response& res);
+    void handleUpdateCartItem(const Request& req, Response& res);
+    void handleRemoveFromCart(const Request& req, Response& res);
+    void handleRemoveProductFromCart(const Request& req, Response& res);
+    void handleClearCart(const Request& req, Response& res);
+    void handleGetCartSummary(const Request& req, Response& res);
+    void handleCheckoutCart(const Request& req, Response& res);
+
 public:
     HTTPServer(int port = 8080);
     void start();
