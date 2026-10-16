@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 4.1.1)
 
-#https://github.com/Kitware/CMake/blob/v4.1.1/Help/dev/experimental.rst
-
-set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
-set(CMAKE_CXX_MODULE_STD ON)
-
 project(Merchant_end VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
